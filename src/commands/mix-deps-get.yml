@@ -1,0 +1,17 @@
+description: "Fetches Mix dependencies"
+parameters:
+  cd:
+    type: string
+    default: .
+steps:
+  - run:
+      name: Fetch Mix dependencies
+      command: |
+        cd << parameters.cd >>
+        n=0
+        until [ $n -ge 5 ]; do
+          mix deps.get && break
+          n=$((n+1))
+          echo "Error while fetching deps. Retrying in 5 seconds"
+          sleep 5
+        done

@@ -1,0 +1,12 @@
+description: Install ghr
+parameters:
+  version:
+    type: string
+    default: 0.12.2
+steps:
+  - run:
+      name: Install ghr
+      command: |
+        wget https://github.com/tcnksm/ghr/releases/download/v<< parameters.version >>/ghr_v<< parameters.version >>_linux_amd64.tar.gz
+        tar xf ghr_v<< parameters.version >>_linux_amd64.tar.gz
+        ln -sf ghr_v<< parameters.version >>_linux_amd64/ghr .

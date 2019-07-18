@@ -1,0 +1,23 @@
+parameters:
+  exec:
+    type: executor
+  github-token:
+    type: env_var_name
+    default: GITHUB_TOKEN
+  circle-project-username:
+    type: env_var_name
+    default: CIRCLE_PROJECT_USERNAME
+  circle-project-reponame:
+    type: env_var_name
+    default: CIRCLE_PROJECT_REPONAME
+executor: << parameters.exec >>
+steps:
+  - restore_cache:
+      key: deploy/system-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+  - install-ghr
+  - run:
+      name: Create release notes
+      command: grep -Pazo "(?s)(?<=## ${CIRCLE_TAG})[^#]+" deploy/system/CHANGELOG.md | sed '/./,$!d' > deploy/system/RELEASE_NOTES
+  - run:
+      name: Deploy artifacts to Github
+      command: ./ghr -draft -t ${<< parameters.github-token >>} -u ${<< parameters.circle-project-username >>} -r ${<< parameters.circle-project-reponame >>} -b "$(cat deploy/system/RELEASE_NOTES)" -replace $CIRCLE_TAG deploy/system/artifacts

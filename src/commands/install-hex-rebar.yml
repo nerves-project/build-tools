@@ -1,0 +1,7 @@
+description: Install hex and rebar
+steps:
+  - run:
+      name: Install hex and rebar
+      command: |
+        mix local.hex --force
+        mix local.rebar --force

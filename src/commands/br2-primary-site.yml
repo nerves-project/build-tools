@@ -1,0 +1,41 @@
+description: Exports BR2_PRIMARY_SITE to a cache from a previous build
+parameters:
+  path:
+    type: string
+    default: dl
+  circle-token:
+    type: env_var_name
+    default: CIRCLE_TOKEN
+  circle-project-username:
+    type: env_var_name
+    default: CIRCLE_PROJECT_USERNAME
+  circle-project-reponame:
+    type: env_var_name
+    default: CIRCLE_PROJECT_REPONAME
+  circle-job:
+    type: env_var_name
+    default: CIRCLE_JOB
+steps:
+  - run:
+      name: Export BR2_PRIMARY_SITE to previous run cache
+      command: |
+        if [ -n "${<< parameters.circle-token >>}" ]; then
+          ARTIFACT_PATH="<< parameters.path >>"
+          API_URL="https://circleci.com/api/v1.1/project/github/${<< parameters.circle-project-username >>}/${<< parameters.circle-project-reponame >>}?circle-token=${<< parameters.circle-token >>}&limit=25&filter=successful"
+          LAST_SUCCESSFUL_JOB=$(curl -s -H "Accept: application/json" "$API_URL" | jq --arg CIRCLE_JOB "${<< parameters.circle-job >>}" 'reduce .[] as $i ([]; if ($i | .build_parameters[]) == $CIRCLE_JOB then . + [$i] else . end) | first')
+          if [ -n "$LAST_SUCCESSFUL_JOB" ]; then
+            BUILD_NUMBER=$(echo "$LAST_SUCCESSFUL_JOB" | jq '.build_num')
+            API_URL="https://circleci.com/api/v1.1/project/github/${<< parameters.circle-project-username >>}/${<< parameters.circle-project-reponame >>}/$BUILD_NUMBER/artifacts?circle-token=${<< parameters.circle-token >>}"
+            ARTIFACTS=$(curl -s -H "Accept: application/json" "$API_URL" | jq -s '.[]')
+            ARTIFACT=$(echo "$ARTIFACTS" | jq --arg ARTIFACT_PATH "$ARTIFACT_PATH" '[.[] | select(.path | startswith("dl"))] | first')
+            if [ -n "$ARTIFACT" ]; then
+              PRIMARY_SITE=$(echo "$ARTIFACT" | jq -r '.url' | sed 's/'"$ARTIFACT_PATH"'.*$/'"$ARTIFACT_PATH"'/')
+              echo "$PRIMARY_SITE"
+            fi
+          else
+            echo "No eligible jobs found"
+            echo ""
+          fi
+        else
+          echo "Circle token not set. Skipping"
+        fi

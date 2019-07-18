@@ -1,0 +1,38 @@
+parameters:
+  exec:
+    type: executor
+  aws-sns-topic-arn:
+    type: env_var_name
+    default: AWS_SNS_TOPIC_ARN
+executor: << parameters.exec >>
+steps:
+  - checkout
+  - install-elixir:
+      version: $ELIXIR_VERSION
+  - install-hex-rebar
+  - install-nerves-bootstrap
+  - aws-cli/install
+  - run:
+      name: Update path
+      command: echo 'export PATH=$HOME/bin:$PATH' >> $BASH_ENV
+  - restore_cache:
+      key: deploy/system-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+  - run:
+      name: Copy artifacts
+      command: |
+        mkdir -p ~/.nerves/dl
+        cp deploy/system/artifacts/*.gz ~/.nerves/dl
+  - restore_cache:
+      key: deploy/test-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+  - restore_cache:
+      key: test/build-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+  - mix-deps-get:
+      cd: test
+  - run:
+      name: Publish to NervesHub
+      command: |
+        cd test
+        mix nerves_hub.firmware publish ../deploy/test/artifacts/${CIRCLE_SHA1}.fw --ttl 3600
+  - deploy:
+      name: Publish notification on SNS
+      command: aws sns publish --topic-arn ${<< parameters.aws-sns-topic-arn >>} --message "$(cat deploy/test/artifacts/${CIRCLE_SHA1}.json)"

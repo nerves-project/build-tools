@@ -1,0 +1,9 @@
+description: Install nerves_bootstrap
+parameters:
+  version:
+    type: string
+    default: "~> 1.0"
+steps:
+  - run:
+      name: Install nerves_bootstrap
+      command: mix archive.install hex nerves_bootstrap "<< parameters.version >>" --force

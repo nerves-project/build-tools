@@ -1,0 +1,48 @@
+parameters:
+  exec:
+    type: executor
+executor: << parameters.exec >>
+steps:
+  - checkout
+  - restore_cache:
+      key: deploy/system-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+  - run:
+      name: Copy artifacts
+      command: |
+        mkdir -p ~/.nerves/dl
+        cp deploy/system/artifacts/*.gz ~/.nerves/dl
+  - install-elixir:
+      version: $ELIXIR_VERSION
+  - install-hex-rebar
+  - install-nerves-bootstrap
+  - mix-deps-get:
+      cd: test
+  - run:
+      name: Create test firmware
+      command: |
+        cd test
+        mix firmware
+  - run:
+      name: Sign firmware
+      command: |
+        cd test
+        mix nerves_hub.firmware sign --key test
+  - save_cache:
+      key: test/build-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+      paths:
+        - "test/_build"
+
+  - run:
+      name: Create artifact dir
+      command: mkdir -p deploy/test/artifacts
+  - create-build-context
+  - run:
+      name: Copy artifact
+      command: cp test/_build/target_test/nerves/images/test.fw deploy/test/artifacts/${CIRCLE_SHA1}.fw
+  - store_artifacts:
+      path: deploy/test/artifacts
+      destination: test
+  - save_cache:
+      key: deploy/test-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+      paths:
+        - "deploy/test"

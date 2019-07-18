@@ -1,0 +1,7 @@
+description: Install jq
+steps:
+  - run:
+      name: Install jq
+      command: |
+        apt update -qq
+        apt install jq -qq -y

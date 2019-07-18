@@ -1,0 +1,51 @@
+parameters:
+  exec:
+    type: executor
+executor: << parameters.exec >>
+steps:
+  - checkout
+  - install-elixir:
+      version: $ELIXIR_VERSION
+  - install-hex-rebar
+  - install-nerves-bootstrap
+  - br2-primary-site
+  - mix-deps-get
+  - run:
+      name: Validate Hex package
+      command: mix hex.build
+  - run:
+      name: Build
+      command: mix compile
+  - run:
+      name: Did I really build
+      command: |
+        [ -d .nerves ] || (echo "VERSION file needs to be bumped or a config file needs to change to force a build"; exit 1)
+  - run:
+      name: Lint
+      command: mix nerves.system.lint nerves_defconfig
+  - run:
+      name: Create artifact dir
+      command: mkdir -p deploy/system/artifacts
+  - run:
+      name: Copy CHANGELOG
+      command: cp ./CHANGELOG.md deploy/system/CHANGELOG.md
+
+  - run:
+      name: Create artifacts
+      command: |
+        if [ -n "$CIRCLE_TAG" ]; then
+          TAG=$CIRCLE_TAG
+        else
+          TAG=$CIRCLE_SHA1
+        fi
+        mix nerves.artifact ${CIRCLE_PROJECT_REPONAME} --path deploy/system/artifacts
+  - store_artifacts:
+      path: deploy/system/artifacts
+      destination: system
+  - store_artifacts:
+      path: /root/.nerves/dl
+      destination: dl
+  - save_cache:
+      key: deploy/system-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
+      paths:
+        - "deploy/system"

@@ -1,0 +1,14 @@
+parameters:
+  version:
+    type: string
+  elixir:
+    type: string
+  mix_env:
+    type: string
+    default: test
+docker:
+  - image: nervesproject/nerves_system_br:<< parameters.version >>
+environment:
+  ENV: CI
+  MIX_ENV: << parameters.mix_env >>
+  ELIXIR_VERSION: << parameters.elixir >>
