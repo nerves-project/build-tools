@@ -24,8 +24,6 @@ steps:
         cp deploy/system/artifacts/*.gz ~/.nerves/dl
   - restore_cache:
       key: deploy/test-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
-  - restore_cache:
-      key: test/build-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
   - mix-deps-get:
       cd: test
   - run:
