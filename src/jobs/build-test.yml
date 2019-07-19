@@ -27,11 +27,6 @@ steps:
       command: |
         cd test
         mix nerves_hub.firmware sign --key test
-  - save_cache:
-      key: test/build-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
-      paths:
-        - "test/_build"
-
   - run:
       name: Create artifact dir
       command: mkdir -p deploy/test/artifacts
