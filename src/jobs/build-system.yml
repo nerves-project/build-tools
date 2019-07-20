@@ -1,7 +1,11 @@
 parameters:
   exec:
     type: executor
+  resource-class:
+    type: string
+    default: medium
 executor: << parameters.exec >>
+resource_class: << parameters.resource-class >>
 steps:
   - checkout
   - install-elixir:
