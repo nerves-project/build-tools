@@ -1,5 +1,10 @@
 # nerves-project/build-tools
 
+## v0.1.3
+
+* Bug fixes
+  * Allow passing `resource-class` to `build_system` job.
+
 ## v0.1.2
 
 * Bug fixes
