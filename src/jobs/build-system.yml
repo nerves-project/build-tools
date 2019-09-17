@@ -4,6 +4,9 @@ parameters:
   resource-class:
     type: string
     default: medium
+  hex-validate:
+    type: boolean
+    default: true
 executor: << parameters.exec >>
 resource_class: << parameters.resource-class >>
 steps:
@@ -14,9 +17,12 @@ steps:
   - install-nerves-bootstrap
   - br2-primary-site
   - mix-deps-get
-  - run:
-      name: Validate Hex package
-      command: mix hex.build
+  - when:
+      condition: << parameters.hex-validate >>
+      steps:
+        - run:
+            name: Validate Hex package
+            command: mix hex.build
   - run:
       name: Build
       command: mix compile
