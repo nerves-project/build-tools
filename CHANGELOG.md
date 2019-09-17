@@ -1,5 +1,11 @@
 # nerves-project/build-tools
 
+## v0.1.4
+
+* Bug fixes
+  * Added boolean parameter `hex-validate` disable hex package
+    validation. This is useful when using dependencies from git.
+
 ## v0.1.3
 
 * Bug fixes
