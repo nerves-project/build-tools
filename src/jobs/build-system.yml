@@ -7,10 +7,14 @@ parameters:
   hex-validate:
     type: boolean
     default: true
+  env-setup:
+    type: steps
+    default: []
 executor: << parameters.exec >>
 resource_class: << parameters.resource-class >>
 steps:
   - checkout
+  - steps: << parameters.env-setup >>
   - install-elixir:
       version: $ELIXIR_VERSION
   - install-hex-rebar
