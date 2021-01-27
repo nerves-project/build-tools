@@ -1,5 +1,14 @@
 # nerves-project/build-tools
 
+## v0.1.5
+
+* Bug fixes
+  * Add boolean parameter `save-dl-cache` to disable saving the dl cache
+    files. Useful for preventing builds with git repos in the dl cache
+    from taking too much time.
+  * Add list parameter `env-setup` for passing extra steps to execute when
+    setting up the build environment.
+
 ## v0.1.4
 
 * Bug fixes
