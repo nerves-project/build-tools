@@ -10,6 +10,9 @@ parameters:
   env-setup:
     type: steps
     default: []
+  save-dl-cache:
+    type: boolean
+    default: true
 executor: << parameters.exec >>
 resource_class: << parameters.resource-class >>
 steps:
@@ -56,9 +59,12 @@ steps:
   - store_artifacts:
       path: deploy/system/artifacts
       destination: system
-  - store_artifacts:
-      path: /root/.nerves/dl
-      destination: dl
+  - when:
+      condition: << parameters.save-dl-cache >>
+      steps:
+        - store_artifacts:
+            path: /root/.nerves/dl
+            destination: dl
   - save_cache:
       key: deploy/system-{{ .Revision }}-{{ .Environment.CIRCLE_TAG }}
       paths:
