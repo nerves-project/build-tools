@@ -1,0 +1,46 @@
+parameters:
+  exec:
+    type: executor
+  resource-class:
+    type: string
+    default: medium
+  hex-validate:
+    type: boolean
+    default: true
+  env-setup:
+    type: steps
+    default: []
+  save-dl-cache:
+    type: boolean
+    default: true
+executor: << parameters.exec >>
+resource_class: << parameters.resource-class >>
+steps:
+  - checkout
+  - steps: << parameters.env-setup >>
+  - install-elixir:
+      version: $ELIXIR_VERSION
+  - install-hex-rebar
+  - install-nerves-bootstrap
+  - mix-deps-get
+  - when:
+      condition: << parameters.hex-validate >>
+      steps:
+        - run:
+            name: Validate Hex package
+            command: mix hex.build
+  - restore-nerves-downloads
+  - run:
+      name: Get Buildroot dependencies
+      command: |
+        ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
+        cd ~/temp_nerves_system
+        make source
+  - when:
+      condition: << parameters.save-dl-cache >>
+      steps:
+      - save_cache:
+          name: Save Nerves downloads
+          key: nerves-dl-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - "~/.nerves/dl"
