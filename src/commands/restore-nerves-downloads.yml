@@ -1,0 +1,9 @@
+description: Restore Nerves downloads
+steps:
+  - restore_cache:
+      name: Restore Nerves downloads
+      keys:
+        - nerves-dl-{{ .Branch }}-{{ .Revision }}
+        - nerves-dl-{{ .Branch }}-
+        - nerves-dl-main-
+        - nerves-dl-
