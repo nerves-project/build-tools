@@ -20,13 +20,13 @@ steps:
   - install-hex-rebar
   - install-nerves-bootstrap
   - mix-deps-get
+  - restore-nerves-downloads
   - when:
       condition: << parameters.hex-validate >>
       steps:
         - run:
             name: Validate Hex package
             command: mix hex.build
-  - restore-nerves-downloads
   - run:
       name: Build
       command: mix compile
