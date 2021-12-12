@@ -1,6 +1,18 @@
 parameters:
   exec:
     type: executor
+  aws-access-key-id:
+    type: env_var_name
+    default: AWS_ACCESS_KEY_ID
+  aws-secret-access-key:
+    type: env_var_name
+    default: AWS_SECRET_ACCESS_KEY
+  aws-region:
+    type: env_var_name
+    default: AWS_REGION
+  cache-bucket-uri:
+    type: env_var_name
+    default: CACHE_BUCKET_URI
   resource-class:
     type: string
     default: medium
@@ -13,6 +25,9 @@ parameters:
   save-dl-cache:
     type: boolean
     default: true
+  save-public-cache:
+    type: boolean
+    default: false
 executor: << parameters.exec >>
 resource_class: << parameters.resource-class >>
 steps:
@@ -22,6 +37,15 @@ steps:
       version: $ELIXIR_VERSION
   - install-hex-rebar
   - install-nerves-bootstrap
+  - run:
+      name: Install AWS CLI
+      command: |
+        apt install -y python3-pip
+        pip install awscli
+
+        aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
+        aws configure set aws_secret_access_key ${<< parameters.aws-secret-access-key >>}
+        aws configure set region ${<< parameters.aws-region >>}
   - mix-deps-get
   - restore-nerves-downloads
   - when:
@@ -44,3 +68,9 @@ steps:
           key: nerves-dl-{{ .Branch }}-{{ .Revision }}
           paths:
             - "~/.nerves/dl"
+  - when:
+      condition: << parameters.save-public-cache >>
+      steps:
+      - run:
+          name: Sync public cache
+          command: aws s3 sync ~/.nerves/dl ${<< parameters.cache-bucket-uri >>} --exclude "*" --include "*.tar.*" --include "*.patch.*" --include "*.patch" --include "*-patch.*" --exclude ".lock" --exclude "*git/*"
