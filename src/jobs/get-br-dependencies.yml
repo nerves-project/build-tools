@@ -40,15 +40,18 @@ steps:
       version: $ELIXIR_VERSION
   - install-hex-rebar
   - install-nerves-bootstrap
-  - run:
-      name: Install AWS CLI
-      command: |
-        apt install -y python3-pip
-        pip install awscli
+  - when:
+      condition: << parameters.save-public-cache >>
+      steps:
+      - run:
+          name: Install AWS CLI
+          command: |
+            apt install -y python3-pip
+            pip install awscli
 
-        aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
-        aws configure set aws_secret_access_key ${<< parameters.aws-secret-access-key >>}
-        aws configure set region ${<< parameters.aws-region >>}
+            aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
+            aws configure set aws_secret_access_key ${<< parameters.aws-secret-access-key >>}
+            aws configure set region ${<< parameters.aws-region >>}
   - mix-deps-get
   - restore-nerves-downloads
   - when:
