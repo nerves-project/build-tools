@@ -78,5 +78,5 @@ steps:
       condition: << parameters.save-public-cache >>
       steps:
       - run:
-          name: Sync public cache
+          name: Push new packages to download site
           command: aws s3 sync ~/.nerves/dl ${<< parameters.cache-bucket-uri >>} --exclude "*" --include "*.tar.*" --include "*.patch.*" --include "*.patch" --include "*-patch.*" --exclude ".lock" --exclude "*git/*"
