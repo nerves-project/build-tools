@@ -60,10 +60,15 @@ workflows:
               only: /v.*/
 ```
 
-### Public Cache
+### Package download sites
 
-This orb can sync the buildroot dependencies to a public cache in AWS S3.
-Perform the following steps to enable the public cache for a Nerves system.
+System builds download software packages from many sites on the Internet. In order to mitigate download
+failures from sites going offline, package URLs changing, slow downloads, etc, Buildroot supports primary and 
+backup download sites. The Buildroot project maintains the default backup download site. Nerves-specific packages are not on the Buildroot site. Keeping an archive of all downloaded packages is important to ensure that your project can be built in the future.
+
+The Nerves project maintains a package download site. This orb will use it by setting `BR2_PRIMARY_SITE` to it. Buildroot will attempt to download packages from there first. If they don't exist, the normal download URLs will be tried and if those fail, Buildroot's backup download site will be tried.
+
+This orb can push new packages to the download site for future builds. Only AWS S3 is supported. To use this feature, you will need to set parameters as environment variables in CircleCI:
 
 - Add `save-public-cache: true` to the `build-tools/get-br-dependencies` job.
 
