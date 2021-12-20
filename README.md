@@ -60,6 +60,24 @@ workflows:
               only: /v.*/
 ```
 
+### CircleCI download cache
+
+By default the packages downloaded by Buildroot (`~/.nerves/dl`), are cached by
+CircleCI for use in other steps. If you would like to disable saving this cache,
+set `save-dl-cache: false` in the `build-tools/get-br-dependencies` job for your
+Nerves system's CI workflow.
+
+```yaml
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build-tools/get-br-dependencies:
+          exec:
+            <<: *exec
+          save-dl-cache: false
+```
+
 ### Package download sites
 
 System builds download software packages from many sites on the Internet. In order to mitigate download
