@@ -70,7 +70,9 @@ The Nerves project maintains a package download site. This orb will use it by se
 
 This orb can push new packages to the download site for future builds. Only AWS S3 is supported. To use this feature, you will need to set parameters as environment variables in CircleCI:
 
-- Add `save-public-cache: true` to the `build-tools/get-br-dependencies` job.
+- Add `push-to-download-site: true` to the `build-tools/get-br-dependencies` job.
+- Add `download-site-url: https://<download-site-url>` and set it to the public
+  URL of the S3 bucket. The steps to create the bucket are below.
 
 ```yaml
 workflows:
@@ -80,7 +82,8 @@ workflows:
       - build-tools/get-br-dependencies:
           exec:
             <<: *exec
-          save-public-cache: true
+          push-to-download-site: true
+          download-site-url: https://<bucket-name>.s3.amazonaws.com
 ```
 
 - Create an AWS S3 bucket.
@@ -109,7 +112,9 @@ workflows:
   - `AWS_ACCESS_KEY_ID`
   - `AWS_SECRET_ACCESS_KEY`
   - `AWS_REGION`
-  - `CACHE_BUCKET_URI` (`s3://<bucket-name>/`)
+  - `DOWNLOAD_SITE_BUCKET_URI` (`s3://<bucket-name>/`)
 
-- In your Nerves system `nerves_defconfig` file, set the buildroot cache to the
-  S3 bucket URL: `BR2_PRIMARY_SITE="https://<bucket-name>.s3.amazonaws.com"`
+- If you would like your Nerves system to pull packages from the download site
+  when building outside of CI, set the Buildroot primary site in your Nerves
+  system `nerves_defconfig` file to the S3 bucket URL:
+  `BR2_PRIMARY_SITE="https://<bucket-name>.s3.amazonaws.com"`

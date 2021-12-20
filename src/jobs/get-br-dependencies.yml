@@ -10,9 +10,9 @@ parameters:
   aws-region:
     type: env_var_name
     default: AWS_REGION
-  cache-bucket-uri:
+  download-site-bucket-uri:
     type: env_var_name
-    default: CACHE_BUCKET_URI
+    default: DOWNLOAD_SITE_BUCKET_URI
   resource-class:
     type: string
     default: medium
@@ -25,7 +25,7 @@ parameters:
   save-dl-cache:
     type: boolean
     default: true
-  save-public-cache:
+  push-to-download-site:
     type: boolean
     default: false
   download-site-url:
@@ -41,7 +41,7 @@ steps:
   - install-hex-rebar
   - install-nerves-bootstrap
   - when:
-      condition: << parameters.save-public-cache >>
+      condition: << parameters.push-to-download-site >>
       steps:
       - run:
           name: Install AWS CLI
@@ -75,8 +75,8 @@ steps:
           paths:
             - "~/.nerves/dl"
   - when:
-      condition: << parameters.save-public-cache >>
+      condition: << parameters.push-to-download-site >>
       steps:
       - run:
           name: Push new packages to download site
-          command: aws s3 sync ~/.nerves/dl ${<< parameters.cache-bucket-uri >>} --exclude "*" --include "*.tar.*" --include "*.patch.*" --include "*.patch" --include "*-patch.*" --exclude ".lock" --exclude "*git/*"
+          command: aws s3 sync ~/.nerves/dl ${<< parameters.download-site-bucket-uri >>} --exclude "*" --include "*.tar.*" --include "*.patch.*" --include "*.patch" --include "*-patch.*" --exclude ".lock" --exclude "*git/*"
