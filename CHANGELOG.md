@@ -1,5 +1,11 @@
 # nerves-project/build-tools
 
+## v0.2.0
+
+* Changed
+  * Move fetching and caching Buildroot dependencies to its own job
+  * https://dl.nerves-project.org is used as BR2_PRIMARY_SITE by default
+
 ## v0.1.5
 
 * Bug fixes
