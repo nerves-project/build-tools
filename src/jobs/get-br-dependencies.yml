@@ -30,7 +30,7 @@ parameters:
     default: false
   download-site-url:
     type: string
-    default: https://dl.nerves-project.org
+    default: http://dl.nerves-project.org
 executor: << parameters.exec >>
 resource_class: << parameters.resource-class >>
 steps:
