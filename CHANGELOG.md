@@ -1,5 +1,14 @@
 # nerves-project/build-tools
 
+## v0.2.1
+
+* Bug fixes
+  * [get-br-dependencies] Change default download site URL to be HTTP
+    to fix certificate errors when downloading
+  * [get-br-dependencies] Only override the download site when the job is
+    set to update the download site. If not updating the download site, use 
+    the nerves_defconfig settings.
+
 ## v0.2.0
 
 * Changed
