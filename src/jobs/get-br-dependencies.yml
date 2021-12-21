@@ -60,12 +60,24 @@ steps:
         - run:
             name: Validate Hex package
             command: mix hex.build
-  - run:
-      name: Get Buildroot dependencies
-      command: |
-        ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
-        cd ~/temp_nerves_system
-        make BR2_PRIMARY_SITE=<< parameters.download-site-url >> BR2_BACKUP_SITE=http://sources.buildroot.net source
+  - when:
+      condition: << parameters.push-to-download-site >>
+      steps:
+        - run:
+            name: Get Buildroot dependencies [<< parameters.download-site-url >>]
+            command: |
+              ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
+              cd ~/temp_nerves_system
+              make BR2_PRIMARY_SITE=<< parameters.download-site-url >> BR2_BACKUP_SITE=http://sources.buildroot.net source
+  - unless:
+      condition: << parameters.push-to-download-site >>
+      steps:
+        - run:
+            name: Get Buildroot dependencies [source]
+            command: |
+              ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
+              cd ~/temp_nerves_system
+              make source
   - when:
       condition: << parameters.save-dl-cache >>
       steps:
