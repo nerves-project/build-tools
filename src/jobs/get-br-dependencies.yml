@@ -13,6 +13,9 @@ parameters:
   download-site-bucket-uri:
     type: env_var_name
     default: DOWNLOAD_SITE_BUCKET_URI
+  push-to-download-site:
+    type: env_var_name
+    default: PUSH_TO_DOWNLOAD_SITE
   resource-class:
     type: string
     default: medium
@@ -25,9 +28,6 @@ parameters:
   save-dl-cache:
     type: boolean
     default: true
-  push-to-download-site:
-    type: boolean
-    default: false
   download-site-url:
     type: string
     default: http://dl.nerves-project.org
@@ -40,18 +40,17 @@ steps:
       version: $ELIXIR_VERSION
   - install-hex-rebar
   - install-nerves-bootstrap
-  - when:
-      condition: << parameters.push-to-download-site >>
-      steps:
-      - run:
-          name: Install AWS CLI
-          command: |
-            apt install -y python3-pip
-            pip install awscli
+  - run:
+      name: Install AWS CLI
+      command: |
+        [[ -z "${PUSH_TO_DOWNLOAD_SITE}" ]] && echo "Skipped" && exit 0
 
-            aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
-            aws configure set aws_secret_access_key ${<< parameters.aws-secret-access-key >>}
-            aws configure set region ${<< parameters.aws-region >>}
+        apt install -y python3-pip
+        pip install awscli
+
+        aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
+        aws configure set aws_secret_access_key ${<< parameters.aws-secret-access-key >>}
+        aws configure set region ${<< parameters.aws-region >>}
   - mix-deps-get
   - restore-nerves-downloads
   - when:
@@ -60,24 +59,17 @@ steps:
         - run:
             name: Validate Hex package
             command: mix hex.build
-  - when:
-      condition: << parameters.push-to-download-site >>
-      steps:
-        - run:
-            name: Get Buildroot dependencies [<< parameters.download-site-url >>]
-            command: |
-              ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
-              cd ~/temp_nerves_system
-              make BR2_PRIMARY_SITE=<< parameters.download-site-url >> BR2_BACKUP_SITE=http://sources.buildroot.net source
-  - unless:
-      condition: << parameters.push-to-download-site >>
-      steps:
-        - run:
-            name: Get Buildroot dependencies [source]
-            command: |
-              ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
-              cd ~/temp_nerves_system
-              make source
+  - run:
+      name: Get Buildroot dependencies
+      command: |
+        ./deps/nerves_system_br/create-build.sh nerves_defconfig ~/temp_nerves_system
+        cd ~/temp_nerves_system
+
+        if [[ -n "${PUSH_TO_DOWNLOAD_SITE}" ]]; then
+          make BR2_PRIMARY_SITE=<< parameters.download-site-url >> BR2_BACKUP_SITE=http://sources.buildroot.net source
+        else
+          make source
+        fi
   - when:
       condition: << parameters.save-dl-cache >>
       steps:
@@ -86,9 +78,8 @@ steps:
           key: nerves-dl-{{ .Branch }}-{{ .Revision }}
           paths:
             - "~/.nerves/dl"
-  - when:
-      condition: << parameters.push-to-download-site >>
-      steps:
-      - run:
-          name: Push new packages to download site
-          command: aws s3 sync ~/.nerves/dl ${<< parameters.download-site-bucket-uri >>} --exclude "*" --include "*.tar.*" --include "*.patch.*" --include "*.patch" --include "*-patch.*" --exclude ".lock" --exclude "*git/*"
+  - run:
+      name: Push new packages to download site
+      command: |
+        [[ -z "${PUSH_TO_DOWNLOAD_SITE}" ]] && echo "Skipped" && exit 0
+        aws s3 sync ~/.nerves/dl ${<< parameters.download-site-bucket-uri >>} --exclude "*" --include "*.tar.*" --include "*.patch.*" --include "*.patch" --include "*-patch.*" --exclude ".lock" --exclude "*git/*"
