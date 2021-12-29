@@ -1,5 +1,11 @@
 # nerves-project/build-tools
 
+## v0.2.2
+
+* Changed
+  * [get-br-dependencies] Enable download site with environment variable
+    (`PUSH_TO_DOWNLOAD_SITE`) instead of CI parameter
+
 ## v0.2.1
 
 * Bug fixes
