@@ -136,3 +136,38 @@ workflows:
   when building outside of CI, set the Buildroot primary site in your Nerves
   system `nerves_defconfig` file to the S3 bucket URL:
   `BR2_PRIMARY_SITE="https://<bucket-name>.s3.amazonaws.com"`
+
+### Creating a release
+
+To create a release for your custom Nerves system:
+  - Update the system's `VERSION` file with the version number for the release,
+    *without* a leading `v` (`1.0.0`).
+  - Update `CHANGELOG.md`, ensuring to create a header with the version number
+    that *includes* the leading `v` (`## v1.0.0`).
+  - Commit these changes.
+  - Add a tag to this commit named after the version that *includes* the leading
+    `v` (`v1.0.0`).
+  - Push the commit and tag to the git remote (GitHub).
+  - CircleCI will detect the tag and create a draft release with the Nerves
+    system artifact.
+  - Review the draft release in GitHub, change the name, and publish the release.
+
+#### Configuration
+
+CircleCI requires a GitHub personal access token to be able to create the GitHub
+draft release.
+
+To create this token:
+  - Navigate to your GitHub user settings
+(click avatar) `->` developer settings `->` personal access tokens `->`
+fine-grained tokens.
+  - Click the `generate new token` button.
+  - Fill out the fields according to your needs until you get to
+    `repository access`.
+  - Select either `all repositories` or `only select repositories`.
+  - Under `repository permissions`, set:
+    - `Contents` - read and write
+    - `Metadata` - read-only
+
+Add this token to your CircleCI project's or context's `GITHUB_TOKEN`
+environment variable.
