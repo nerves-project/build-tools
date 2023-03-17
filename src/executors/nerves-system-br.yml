@@ -7,7 +7,7 @@ parameters:
     type: string
     default: test
 docker:
-  - image: nervesproject/nerves_system_br:<< parameters.version >>
+  - image: ghcr.io/nerves-project/nerves_system_br:<< parameters.version >>
 environment:
   ENV: CI
   MIX_ENV: << parameters.mix_env >>
