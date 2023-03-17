@@ -1,5 +1,10 @@
 # nerves-project/build-tools
 
+## v0.2.3
+
+* Changed
+  *  `nerves-system-br` executor now points to GitHub Contrainer registry
+
 ## v0.2.2
 
 * Changed
