@@ -7,5 +7,5 @@ steps:
       name: Install Elixir
       command: |
         wget https://repo.hex.pm/builds/elixir/v<< parameters.version >>.zip
-        unzip -d /usr/local/elixir v<< parameters.version >>.zip
-        echo 'export PATH=/usr/local/elixir/bin:$PATH' >> $BASH_ENV
+        unzip -d $HOME/elixir v<< parameters.version >>.zip
+        echo 'export PATH=$HOME/elixir/bin:$PATH' >> $BASH_ENV
