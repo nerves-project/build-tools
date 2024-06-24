@@ -2,10 +2,13 @@ description: Install Elixir
 parameters:
   version:
     type: string
+  install_path:
+    type: string
+    default: $HOME/elixir
 steps:
   - run:
       name: Install Elixir
       command: |
         wget https://repo.hex.pm/builds/elixir/v<< parameters.version >>.zip
-        unzip -d $HOME/elixir v<< parameters.version >>.zip
-        echo 'export PATH=$HOME/elixir/bin:$PATH' >> $BASH_ENV
+        unzip -d << parameters.install_path >> v<< parameters.version >>.zip
+        echo 'export PATH=<< parameters.install_path >>/bin:$PATH' >> $BASH_ENV
