@@ -45,7 +45,6 @@ steps:
       command: |
         [[ -z "${PUSH_TO_DOWNLOAD_SITE}" ]] && echo "Skipped" && exit 0
 
-        apt install -y python3-pip
         pip install awscli
 
         aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
