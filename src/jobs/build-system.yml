@@ -47,11 +47,6 @@ steps:
   - run:
       name: Create artifacts
       command: |
-        if [ -n "$CIRCLE_TAG" ]; then
-          TAG=$CIRCLE_TAG
-        else
-          TAG=$CIRCLE_SHA1
-        fi
         mix nerves.artifact ${CIRCLE_PROJECT_REPONAME} --path deploy/system/artifacts
   - store_artifacts:
       path: deploy/system/artifacts
