@@ -1,4 +1,24 @@
-# nerves-project/build-tools
+# Changelog
+
+## v0.3.0
+
+This CircleCI Orb is required to build `nerves_system_br` `v1.28.0` and later
+systems due to the change to require non-root user builds. If you're not using
+`v1.28.0` yet, continue to use `v0.2.x` Orbs.
+
+Please update your `.circleci/config.yml` to have the following:
+
+```yaml
+orbs:
+  build-tools: nerves-project/build-tools@0.3.0
+```
+
+* Changed
+  * Don't require root when installing Elixir in `install-elixir`
+  * Changes the default install path to `$HOME/elixir`. Use the `install_path`
+    parameter to change
+  * Reverse order of dep fetch and Nerves downloads to improve build time
+  * Remove unused `TAG` var in `build-system`
 
 ## v0.2.3
 
@@ -17,7 +37,7 @@
   * [get-br-dependencies] Change default download site URL to be HTTP
     to fix certificate errors when downloading
   * [get-br-dependencies] Only override the download site when the job is
-    set to update the download site. If not updating the download site, use 
+    set to update the download site. If not updating the download site, use
     the nerves_defconfig settings.
 
 ## v0.2.0
