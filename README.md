@@ -1,7 +1,7 @@
 # nerves-project/build-tools
 
 A collection of common commands, jobs, and executors for building, testing, and
-deploying Nerves systems.
+deploying Nerves systems on CircleCI.
 
 ## Usage
 
@@ -10,43 +10,41 @@ for details on usage, or see below example:
 
 ## Examples
 
-The following example shows how to build a system, construct a test app,
-and deploy.
+The following example shows how to build a system, construct a test app, and
+deploy.
 
 ```yaml
 exec: &exec
   name: build-tools/nerves-system-br
-  version: 1.8.4
-  elixir_version: 1.9.0-otp-22
+  version: 1.28.0
+  elixir: 1.17.1-otp-27
 
 version: 2.1
 
 orbs:
-  build-tools: nerves-project/build-tools@0.1.0
+  build-tools: nerves-project/build-tools@dev:0.3.0
 
 workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - build-tools/build-system:
+      - build-tools/get-br-dependencies:
           exec:
             <<: *exec
           context: org-global
           filters:
             tags:
               only: /.*/
-      - build-tools/build-test:
+      - build-tools/build-system:
           exec:
             <<: *exec
+          resource-class: large
           context: org-global
           requires:
-            - build-tools/build-system
-      - build-tools/deploy-test:
-          exec:
-            <<: *exec
-          context: org-global
-          requires:
-            - build-tools/build-test
+            - build-tools/get-br-dependencies
+          filters:
+            tags:
+              only: /.*/
       - build-tools/deploy-system:
           exec:
             <<: *exec
@@ -80,13 +78,22 @@ workflows:
 
 ### Package download sites
 
-System builds download software packages from many sites on the Internet. In order to mitigate download
-failures from sites going offline, package URLs changing, slow downloads, etc, Buildroot supports primary and 
-backup download sites. The Buildroot project maintains the default backup download site. Nerves-specific packages are not on the Buildroot site. Keeping an archive of all downloaded packages is important to ensure that your project can be built in the future.
+System builds download software packages from many sites on the Internet. In
+order to mitigate download failures from sites going offline, package URLs
+changing, slow downloads, etc, Buildroot supports primary and backup download
+sites. The Buildroot project maintains the default backup download site.
+Nerves-specific packages are not on the Buildroot site. Keeping an archive of
+all downloaded packages is important to ensure that your project can be built in
+the future.
 
-The Nerves project maintains a package download site. This orb will use it by setting `BR2_PRIMARY_SITE` to it. Buildroot will attempt to download packages from there first. If they don't exist, the normal download URLs will be tried and if those fail, Buildroot's backup download site will be tried.
+The Nerves project maintains a package download site. This orb will use it by
+setting `BR2_PRIMARY_SITE` to it. Buildroot will attempt to download packages
+from there first. If they don't exist, the normal download URLs will be tried
+and if those fail, Buildroot's backup download site will be tried.
 
-This orb can push new packages to the download site for future builds. Only AWS S3 is supported. To use this feature, you will need to set parameters as environment variables in CircleCI:
+This orb can push new packages to the download site for future builds. Only AWS
+S3 is supported. To use this feature, you will need to set parameters as
+environment variables in CircleCI:
 
 - Add `download-site-url: https://<download-site-url>` to the
   `build-tools/get-br-dependencies` job and set it to the public URL of the S3
@@ -158,9 +165,8 @@ CircleCI requires a GitHub personal access token to be able to create the GitHub
 draft release.
 
 To create this token:
-  - Navigate to your GitHub user settings
-(click avatar) `->` developer settings `->` personal access tokens `->`
-fine-grained tokens.
+  - Navigate to your GitHub user settings (click avatar) `->` developer settings
+    `->` personal access tokens `->` fine-grained tokens.
   - Click the `generate new token` button.
   - Fill out the fields according to your needs until you get to
     `repository access`.
