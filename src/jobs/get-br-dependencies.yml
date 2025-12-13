@@ -45,7 +45,7 @@ steps:
       command: |
         [[ -z "${PUSH_TO_DOWNLOAD_SITE}" ]] && echo "Skipped" && exit 0
 
-        pip install awscli
+        pip install awscli --break-system-packages
 
         aws configure set aws_access_key_id ${<< parameters.aws-access-key-id >>}
         aws configure set aws_secret_access_key ${<< parameters.aws-secret-access-key >>}
