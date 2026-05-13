@@ -28,6 +28,9 @@ steps:
             name: Validate Hex package
             command: mix hex.build
   - run:
+      name: Clean stale artifacts
+      command: mix nerves.clean ${CIRCLE_PROJECT_REPONAME}
+  - run:
       name: Build
       command: mix compile
   - run:
